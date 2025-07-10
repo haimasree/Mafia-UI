@@ -1,0 +1,47 @@
+{
+    "players": [
+        {
+            "name": "Mickey",
+            "is_mafia": false,
+            "is_llm": false,
+            "real_name": "Niv1"
+        },
+        {
+            "name": "Lee",
+            "is_mafia": false,
+            "is_llm": false,
+            "real_name": "Gabi"
+        },
+        {
+            "name": "Sutton",
+            "is_mafia": true,
+            "is_llm": true,
+            "real_name": "LLM0"
+        },
+        {
+            "name": "Finley",
+            "is_mafia": true,
+            "is_llm": false,
+            "real_name": "Uri"
+        },
+        {
+            "name": "Reese",
+            "is_mafia": false,
+            "is_llm": false,
+            "real_name": "Niv2"
+        },
+        {
+            "name": "Ariel",
+            "is_mafia": false,
+            "is_llm": false,
+            "real_name": "Niv3"
+        },
+        {
+            "name": "Remi",
+            "is_mafia": false,
+            "is_llm": false,
+            "real_name": "Niv4"
+        }
+    ],
+    "notes": ""
+}

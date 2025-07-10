@@ -1,0 +1,36 @@
+{
+    "players": [
+        {
+            "name": "Jackie",
+            "is_mafia": true,
+            "is_llm": false,
+            "real_name": "Gabi"
+        },
+        {
+            "name": "Logan",
+            "is_mafia": false,
+            "is_llm": false,
+            "real_name": "Uri"
+        },
+        {
+            "name": "Kai",
+            "is_mafia": false,
+            "is_llm": true,
+            "real_name": "LLM0"
+        },
+        {
+            "name": "Peyton",
+            "is_mafia": false,
+            "is_llm": false,
+            "real_name": "Niv1"
+        },
+        {
+            "name": "Robin",
+            "is_mafia": false,
+            "is_llm": false,
+            "real_name": "Niv2"
+        }
+    ],
+    "notes": "Retried an existing config to add its preparation command",
+    "preparation_command": "C:\\Users\\nive\\OneDrive - Mobileye\\Desktop\\University\\Async-Mafia-LLM\\prepare_config.py -o new_try2 -p 5 -b -n games/older/191124_1131/player_names.txt"
+}

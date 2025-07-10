@@ -1,0 +1,5 @@
+the messages are too long
+had | in text
+bot wasnt doing well this time
+has """ and < and | in the beginning of the sentence
+too many bugs like putting " and | chars

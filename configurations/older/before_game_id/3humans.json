@@ -1,0 +1,19 @@
+{
+  "players": [
+    {
+      "name": "Alex",
+      "is_mafia": false,
+      "is_llm": false
+    },
+    {
+      "name": "Bill",
+      "is_mafia": false,
+      "is_llm": false
+    },
+    {
+      "name": "Casey",
+      "is_mafia": true,
+      "is_llm": false
+    }
+  ]
+}

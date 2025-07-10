@@ -1,0 +1,74 @@
+{
+    "players": [
+        {
+            "name": "Harley",
+            "is_mafia": false,
+            "is_llm": false,
+            "real_name": "Uri",
+            "llm_config": {}
+        },
+        {
+            "name": "Alex",
+            "is_mafia": false,
+            "is_llm": false,
+            "real_name": "Asaf",
+            "llm_config": {}
+        },
+        {
+            "name": "Winter",
+            "is_mafia": true,
+            "is_llm": true,
+            "real_name": "LLM0",
+            "llm_config": {
+                "model_name": "meta-llama/Llama-3.1-8B-Instruct",
+                "use_pipeline": false,
+                "pipeline_task": "text-generation",
+                "max_new_tokens": 100,
+                "num_beams": 4,
+                "num_words_per_second_to_wait": 3,
+                "pass_turn_token": "<wait>",
+                "use_turn_token": "<send>",
+                "async_type": "schedule_then_generate"
+            }
+        },
+        {
+            "name": "Robin",
+            "is_mafia": false,
+            "is_llm": false,
+            "real_name": "Noam",
+            "llm_config": {}
+        },
+        {
+            "name": "Emerson",
+            "is_mafia": false,
+            "is_llm": false,
+            "real_name": "Omer",
+            "llm_config": {}
+        },
+        {
+            "name": "Jamie",
+            "is_mafia": true,
+            "is_llm": false,
+            "real_name": "Eliya",
+            "llm_config": {}
+        },
+        {
+            "name": "Kennedy",
+            "is_mafia": false,
+            "is_llm": false,
+            "real_name": "Esther",
+            "llm_config": {}
+        },
+        {
+            "name": "Lee",
+            "is_mafia": false,
+            "is_llm": false,
+            "real_name": "Timna",
+            "llm_config": {}
+        }
+    ],
+    "daytime_minutes": 3,
+    "nighttime_minutes": 1,
+    "notes": "",
+    "preparation_command": "C:\\Users\\nive\\OneDrive - Mobileye\\Desktop\\University\\Async-Mafia-LLM\\prepare_config.py -o pilot121224/second_group_3 -p 8 -m 2 -n configurations/name_files/second_group.txt"
+}

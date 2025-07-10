@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mafia Game - Select Your Name</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🎭 Mafia Game</h1>
+        <div class="card">
+            <h2>Game: {{ game_id }}</h2>
+            <h3>Select Your Real Name</h3>
+            
+            <!-- Show error message if any -->
+            {% if error %}
+            <div class="error-message">
+                {{ error }}
+            </div>
+            {% endif %}
+            
+            {% if available_names %}
+            <!-- Real name selection form -->
+            <form method="post" action="/assign-character/{{ game_id }}">
+                <div class="form-group">
+                    <label for="real_name">Choose Your Real Name:</label>
+                    <select id="real_name" name="real_name" required>
+                        <option value="">-- Select your name --</option>
+                        {% for name in available_names %}
+                        <option value="{{ name }}">{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary">Get My Character</button>
+            </form>
+            
+            <div class="info">
+                <p>Select your real name from the list. You'll be assigned your pre-registered character name for the game.</p>
+            </div>
+            {% else %}
+            <div class="error-message">
+                No available players for this game, or all players have already joined.
+            </div>
+            <a href="/" class="btn-secondary">Back to Home</a>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

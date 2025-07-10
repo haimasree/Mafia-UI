@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mafia Game - Post-Game Survey</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🎭 Post-Game Survey</h1>
+        <div class="card">
+            <h2>Game: {{ game_id }}</h2>
+            <h3>Thank you for playing, {{ character_name }}!</h3>
+            
+            <form method="post" action="/submit-survey/{{ game_id }}">
+                {% if survey_data.has_llm %}
+                <!-- LLM Identification Section -->
+                <div class="survey-section">
+                    <h4>🤖 LLM Player Identification</h4>
+                    <p>Which player do you think was controlled by an AI/LLM?</p>
+                    
+                    <div class="form-group">
+                        <label for="llm_guess">Select the player you think was the LLM:</label>
+                        <select id="llm_guess" name="llm_guess" required>
+                            <option value="">-- Choose a player --</option>
+                            {% for player in survey_data.other_players %}
+                            <option value="{{ player }}">{{ player }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Metrics Rating Section -->
+                <div class="survey-section">
+                    <h4>📊 Rate the LLM Player</h4>
+                    <p>Please rate the suspected LLM player on the following aspects (1-10 scale):</p>
+                    
+                    {% for metric in survey_data.metrics %}
+                    <div class="form-group">
+                        <label for="metric_{{ metric }}">{{ metric }}:</label>
+                        <div class="rating-group">
+                            <input 
+                                type="range" 
+                                id="metric_{{ metric }}" 
+                                name="metric_{{ metric }}" 
+                                min="1" 
+                                max="10" 
+                                value="5"
+                                oninput="updateRatingValue('{{ metric }}', this.value)"
+                            >
+                            <span class="rating-value" id="value_{{ metric }}">5</span>
+                        </div>
+                        <div class="rating-labels">
+                            <span>1 (Poor)</span>
+                            <span>10 (Excellent)</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <!-- No LLM in game -->
+                <div class="survey-section">
+                    <div class="info-message">
+                        <h4>ℹ️ No LLM Player</h4>
+                        <p>There was no LLM (AI) player in this game.</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Comments Section -->
+                <div class="survey-section">
+                    <h4>💭 Additional Comments</h4>
+                    <div class="form-group">
+                        <label for="comments">Any additional thoughts about the game?</label>
+                        <textarea 
+                            id="comments" 
+                            name="comments" 
+                            rows="4" 
+                            placeholder="Share your thoughts about the game, players, or experience..."
+                        ></textarea>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary">Submit Survey</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function updateRatingValue(metric, value) {
+            document.getElementById('value_' + metric).textContent = value;
+        }
+    </script>
+</body>
+</html>

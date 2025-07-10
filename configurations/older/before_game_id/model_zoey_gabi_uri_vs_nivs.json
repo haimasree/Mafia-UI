@@ -1,0 +1,34 @@
+{
+  "players": [
+    {
+      "name": "Gabi",
+      "is_mafia": true,
+      "is_llm": false
+    },
+    {
+      "name": "Uri",
+      "is_mafia": true,
+      "is_llm": false
+    },
+    {
+      "name": "Niv1",
+      "is_mafia": false,
+      "is_llm": false
+    },
+    {
+      "name": "Niv2",
+      "is_mafia": false,
+      "is_llm": false
+    },
+    {
+      "name": "Niv3",
+      "is_mafia": false,
+      "is_llm": false
+    },
+    {
+      "name": "Zoey",
+      "is_mafia": false,
+      "is_llm": true
+    }
+  ]
+}

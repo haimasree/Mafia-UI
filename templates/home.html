@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mafia Game - Join Game</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🎭 Mafia Game</h1>
+        <div class="card">
+            <h2>Join a Game</h2>
+            
+            <!-- Show error message if game doesn't exist -->
+            {% if error %}
+            <div class="error-message">
+                {{ error }}
+            </div>
+            {% endif %}
+            
+            <!-- Game ID input form -->
+            <form method="post" action="/join-game">
+                <div class="form-group">
+                    <label for="game_id">Enter Game ID:</label>
+                    <input 
+                        type="text" 
+                        id="game_id" 
+                        name="game_id" 
+                        required 
+                        placeholder="e.g., game123"
+                        autocomplete="off"
+                    >
+                </div>
+                <button type="submit" class="btn-primary">Join Game</button>
+            </form>
+            
+            <div class="instructions">
+                <h3>Instructions:</h3>
+                <ol>
+                    <li>Get the Game ID from your game organizer</li>
+                    <li>Enter the Game ID above</li>
+                    <li>Choose your real name</li>
+                    <li>You'll be assigned a character and the game will begin!</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

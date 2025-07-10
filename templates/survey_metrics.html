@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mafia Game - Rate LLM Player</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🎭 Post-Game Survey</h1>
+        <div class="card">
+            <h2>Game: {{ game_id }}</h2>
+            <h3>Step 2: Rate the LLM Player</h3>
+            
+            <!-- Results Section -->
+            <div class="survey-section">
+                {% if correct_guess %}
+                <div class="success-message">
+                    <h4>✅ Correct!</h4>
+                    <p>You correctly identified <strong>{{ survey_data.llm_player_name }}</strong> as the LLM player!</p>
+                </div>
+                {% else %}
+                <div class="error-message">
+                    <h4>❌ Incorrect</h4>
+                    <p>You guessed <strong>{{ llm_guess }}</strong>, but the LLM player was actually <strong>{{ survey_data.llm_player_name }}</strong>.</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Metrics Rating Section -->
+            <div class="survey-section">
+                <h4>📊 Rate {{ survey_data.llm_player_name }}</h4>
+                <p>Please rate the LLM player on the following aspects:</p>
+                
+                <form method="post" action="/submit-survey/{{ game_id }}">
+                    <!-- Hidden field to store the LLM guess -->
+                    <input type="hidden" name="llm_guess" value="{{ llm_guess }}">
+                    
+                    {% for metric in survey_data.metrics %}
+                    <div class="form-group">
+                        <label for="metric_{{ metric }}">{{ metric }}:</label>
+                        <div class="rating-group">
+                            <input 
+                                type="range" 
+                                id="metric_{{ metric }}" 
+                                name="metric_{{ metric }}" 
+                                min="{{ survey_data.score_bounds.low }}" 
+                                max="{{ survey_data.score_bounds.high }}" 
+                                value="{{ survey_data.score_bounds.high }}"
+                                oninput="updateRatingValue('{{ metric }}', this.value)"
+                            >
+                            <span class="rating-value" id="value_{{ metric }}">{{ survey_data.score_bounds.high }}</span>
+                        </div>
+                        <div class="rating-labels">
+                            <span>{{ survey_data.score_bounds.low }} (Poor)</span>
+                            <span>{{ survey_data.score_bounds.high }} (Excellent)</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    <!-- Comments Section -->
+                    <div class="survey-section">
+                        <h4>💭 Additional Comments</h4>
+                        <div class="form-group">
+                            <label for="comments">Any additional thoughts about the game?</label>
+                            <textarea 
+                                id="comments" 
+                                name="comments" 
+                                rows="4" 
+                                placeholder="Share your thoughts about the game, players, or experience..."
+                            ></textarea>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Complete Survey</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateRatingValue(metric, value) {
+            document.getElementById('value_' + metric).textContent = value;
+        }
+    </script>
+</body>
+</html>

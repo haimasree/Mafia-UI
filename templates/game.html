@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mafia Game - {{ character_name }}</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="game-container">
+        <!-- Game Header -->
+        <div class="game-header">
+            <h1>🎭 Mafia Game: {{ game_id }}</h1>
+            <div class="player-info">
+                <span class="real-name">{{ real_name }}</span>
+                <span class="character-name">Playing as: <strong>{{ character_name }}</strong></span>
+                <span class="role" id="player-role">Role: Loading...</span>
+            </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="chat-container">
+            <div class="chat-messages" id="chat-messages">
+                <!-- Messages will be added here dynamically -->
+            </div>
+        </div>
+
+        <!-- Game Status Area -->
+        <div class="game-status" id="game-status">
+            <div class="status-message">Waiting for game to start...</div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="input-container">
+            <!-- Chat Input -->
+            <div class="chat-input-section">
+                <div class="input-group">
+                    <input 
+                        type="text" 
+                        id="chat-input" 
+                        placeholder="Type your message..."
+                        maxlength="500"
+                    >
+                    <button id="send-chat" class="btn-primary">Send</button>
+                </div>
+            </div>
+
+            <!-- Voting Section (hidden by default) -->
+            <div class="voting-section" id="voting-section" style="display: none;">
+                <h3>🗳️ Voting Time!</h3>
+                <div class="vote-instructions">Choose a player to eliminate:</div>
+                <div class="vote-options" id="vote-options">
+                    <!-- Vote options will be populated dynamically -->
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button id="vote-button" class="btn-secondary" style="display: none;">Vote</button>
+                <button id="survey-button" class="btn-secondary" style="display: none;">Take Survey</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript for real-time functionality -->
+    <script>
+        // Get session ID from cookie
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+
+        const sessionId = getCookie('session_id');
+        const gameId = '{{ game_id }}';
+        const characterName = '{{ character_name }}';
+        const isMAfia = {{ 'true' if is_mafia else 'false' }};
+
+        // WebSocket connection for real-time chat
+        const ws = new WebSocket(`ws://localhost:8000/ws/${gameId}?session_id=${sessionId}`);
+
+        // DOM elements
+        const chatMessages = document.getElementById('chat-messages');
+        const chatInput = document.getElementById('chat-input');
+        const sendChatButton = document.getElementById('send-chat');
+        const gameStatus = document.getElementById('game-status');
+        const votingSection = document.getElementById('voting-section');
+        const voteButton = document.getElementById('vote-button');
+        const playerRole = document.getElementById('player-role');
+
+        // Track voting state - now includes round tracking
+        let currentVotingRound = 0;
+        let hasVotedThisRound = false;
+        let votedPlayer = null;
+
+        // WebSocket event handlers
+        ws.onopen = function(event) {
+            console.log('Connected to game server');
+            addSystemMessage('Connected to game!', 'success');
+        };
+
+        ws.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            handleServerMessage(data);
+        };
+
+        ws.onclose = function(event) {
+            console.log('Disconnected from game server');
+            addSystemMessage('Disconnected from game server', 'error');
+        };
+
+        ws.onerror = function(error) {
+            console.error('WebSocket error:', error);
+            addSystemMessage('Connection error', 'error');
+        };
+
+        // Handle messages from server
+        function handleServerMessage(data) {
+            switch(data.type) {
+                case 'role_info':
+                    playerRole.textContent = `Role: ${data.role}`;
+                    playerRole.className = `role ${data.color}`;
+                    addSystemMessage(`You are a ${data.role}!`, data.color);
+                    break;
+
+                case 'chat_message':
+                    addChatMessage(data.content, data.color);
+                    break;
+
+                case 'game_started':
+                    addSystemMessage(data.message, 'success');
+                    break;
+
+                case 'update_status':
+                    document.querySelector('.status-message').textContent = data.message;
+                    break;
+
+                case 'voted_out':
+                    addSystemMessage(data.message, 'error');
+                    disableChatInput();
+                    showPlayerStatus('voted-out', 'You are eliminated');
+                    break;
+
+                case 'vote_request':
+                    // Check if this is a new round
+                    if (data.round !== currentVotingRound) {
+                        currentVotingRound = data.round;
+                        hasVotedThisRound = false;
+                        votedPlayer = null;
+                    }
+
+                    if (!hasVotedThisRound) {
+                        showVotingInterface(data.vote_options);
+                    }
+                    break;
+
+                case 'already_voted':
+                    // Server tells us we already voted
+                    currentVotingRound = data.round || currentVotingRound;
+                    hasVotedThisRound = true;
+                    votedPlayer = data.voted_player;
+                    addSystemMessage(data.message, 'info');
+                    showVotingInterfaceWithVote(data.voted_player);
+                    break;
+
+                case 'voting_ended':
+                    hideVotingInterface();
+                    addSystemMessage(data.message, 'info');
+                    break;
+
+                case 'game_over':
+                    addSystemMessage(data.message, 'info');
+                    disableInputs();
+                    showSurveyButton();
+                    break;
+
+                default:
+                    console.log('Unknown message type:', data.type);
+            }
+        }
+
+        // Show voting interface with actual player options
+        function showVotingInterface(voteOptions) {
+            votingSection.style.display = 'block';
+
+            const voteOptionsContainer = document.getElementById('vote-options');
+            voteOptionsContainer.innerHTML = '';
+
+            if (voteOptions && voteOptions.length > 0) {
+                voteOptions.forEach(playerName => {
+                    const button = document.createElement('button');
+                    button.className = 'vote-option';
+                    button.textContent = playerName;
+                    button.onclick = () => sendVote(playerName);
+                    voteOptionsContainer.appendChild(button);
+                });
+            } else {
+                voteOptionsContainer.innerHTML = '<p>No players available to vote for.</p>';
+            }
+        }
+
+        // Show voting interface with existing vote marked
+        function showVotingInterfaceWithVote(votedPlayerName) {
+            votingSection.style.display = 'block';
+
+            const voteOptionsContainer = document.getElementById('vote-options');
+            voteOptionsContainer.innerHTML = '';
+
+            // Show that the player has already voted
+            const votedButton = document.createElement('button');
+            votedButton.className = 'vote-option';
+            votedButton.textContent = votedPlayerName + ' ✓';
+            votedButton.disabled = true;
+            votedButton.style.backgroundColor = '#4caf50';
+            voteOptionsContainer.appendChild(votedButton);
+
+            const message = document.createElement('p');
+            message.textContent = 'You have already voted this round.';
+            message.style.color = '#ffe66d';
+            message.style.fontStyle = 'italic';
+            voteOptionsContainer.appendChild(message);
+        }
+
+        // Hide voting interface
+        function hideVotingInterface() {
+            votingSection.style.display = 'none';
+        }
+
+        // Send vote (updated with better state management)
+        function sendVote(playerName) {
+            if (hasVotedThisRound) {
+                addSystemMessage('You have already voted this round!', 'error');
+                return;
+            }
+
+            if (ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                    type: 'vote',
+                    voted_player: playerName
+                }));
+
+                addSystemMessage(`You voted for ${playerName}`, 'info');
+                hasVotedThisRound = true;
+                votedPlayer = playerName;
+
+                // Update the interface to show the vote
+                showVotingInterfaceWithVote(playerName);
+            }
+        }
+
+        // Show player status
+        function showPlayerStatus(status, message) {
+            const statusElement = document.createElement('div');
+            statusElement.className = `player-status ${status}`;
+            statusElement.textContent = message;
+
+            const playerInfo = document.querySelector('.player-info');
+            playerInfo.appendChild(statusElement);
+        }
+
+        // Disable chat input (for voted out players)
+        function disableChatInput() {
+            chatInput.disabled = true;
+            sendChatButton.disabled = true;
+            chatInput.placeholder = "You can observe but not chat";
+        }
+
+        // Show survey button
+        function showSurveyButton() {
+            document.getElementById('survey-button').style.display = 'inline-block';
+        }
+
+        // Handle survey button click (updated to redirect to survey page)
+        document.getElementById('survey-button').addEventListener('click', function() {
+            window.location.href = `/survey/${gameId}`;
+        });
+
+        // Add a chat message to the display (updated to remove sender prefix)
+        function addChatMessage(content, color) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${color}`;
+            messageDiv.textContent = content;
+
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Add a system message
+        function addSystemMessage(message, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `system-message ${type}`;
+            messageDiv.textContent = message;
+
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Send chat message (updated to not show local copy)
+        function sendChatMessage() {
+            const message = chatInput.value.trim();
+            if (message && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                    type: 'chat_message',
+                    content: message
+                }));
+
+                // Don't add to local chat - it will appear from the server
+                chatInput.value = '';
+            }
+        }
+
+        // Show voting interface
+        function disableInputs() {
+            chatInput.disabled = true;
+            sendChatButton.disabled = true;
+            votingSection.style.display = 'none';
+            voteButton.style.display = 'none';
+            
+            // Show survey button
+            document.getElementById('survey-button').style.display = 'inline-block';
+        }
+
+        // Event listeners
+        sendChatButton.addEventListener('click', sendChatMessage);
+
+        chatInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendChatMessage();
+            }
+        });
+
+        // Focus on chat input when page loads
+        window.addEventListener('load', function() {
+            chatInput.focus();
+        });
+    </script>
+</body>
+</html>

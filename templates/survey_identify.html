@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mafia Game - LLM Identification</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🎭 Post-Game Survey</h1>
+        <div class="card">
+            <h2>Game: {{ game_id }}</h2>
+            <h3>Step 1: LLM Player Identification</h3>
+            
+            {% if survey_data.has_llm %}
+            <!-- LLM Identification Section -->
+            <div class="survey-section">
+                <h4>🤖 Which player was controlled by AI?</h4>
+                <p>One of the players in this game was controlled by an AI/LLM. Can you identify which one?</p>
+                
+                <form method="post" action="/submit-identification/{{ game_id }}">
+                    <div class="form-group">
+                        <label for="llm_guess">Select the player you think was the LLM:</label>
+                        <select id="llm_guess" name="llm_guess" required>
+                            <option value="">-- Choose a player --</option>
+                            {% for player in survey_data.other_players %}
+                            <option value="{{ player }}">{{ player }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">Submit Guess</button>
+                </form>
+            </div>
+            {% else %}
+            <!-- No LLM in game -->
+            <div class="survey-section">
+                <div class="info-message">
+                    <h4>ℹ️ No LLM Player</h4>
+                    <p>There was no LLM (AI) player in this game.</p>
+                </div>
+                
+                <form method="post" action="/submit-survey/{{ game_id }}">
+                    <!-- Comments Section -->
+                    <div class="survey-section">
+                        <h4>💭 Additional Comments</h4>
+                        <div class="form-group">
+                            <label for="comments">Any additional thoughts about the game?</label>
+                            <textarea 
+                                id="comments" 
+                                name="comments" 
+                                rows="4" 
+                                placeholder="Share your thoughts about the game, players, or experience..."
+                            ></textarea>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">Complete Survey</button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
