@@ -10,13 +10,13 @@ from llm_players.llm_constants import TASK2OUTPUT_FORMAT, INITIAL_GENERATION_PRO
     REPETITION_PENALTY_KEY, GENERATION_PARAMETERS, USE_TOGETHER_KEY, TOGETHER_API_KEY_KEYWORD, \
     SECRETS_DICT_FILE_PATH, SLEEPING_TIME_FOR_API_GENERATION_ERROR
 
-print("Trying to import torch...", get_current_timestamp())
-import torch
-print("Finished importing torch!", get_current_timestamp())
-print("Trying to import from transformers...", get_current_timestamp())
-from transformers import AutoTokenizer, AutoModelForCausalLM, AutoModelForSeq2SeqLM, AutoConfig, \
-    pipeline
-print("Finished importing from transformers!", get_current_timestamp())
+# print("Trying to import torch...", get_current_timestamp())
+# import torch
+# print("Finished importing torch!", get_current_timestamp())
+# print("Trying to import from transformers...", get_current_timestamp())
+# from transformers import AutoTokenizer, AutoModelForCausalLM, AutoModelForSeq2SeqLM, AutoConfig, \
+#     pipeline
+# print("Finished importing from transformers!", get_current_timestamp())
 
 from together import Together
 from together.error import TogetherException
@@ -28,22 +28,22 @@ def is_local_path(model_name):
     return os.path.isdir(model_name)  # maybe should come up with better mechanism
 
 
-@cache
-def cached_model(model_name):
-    if is_local_path(model_name):
-        config = AutoConfig.from_pretrained(model_name)
-        return AutoModelForSeq2SeqLM.from_pretrained(model_name, config=config)
-    return AutoModelForCausalLM.from_pretrained(model_name, cache_dir=CACHE_DIR)
-
-
-@cache
-def cached_tokenizer(model_name):
-    return AutoTokenizer.from_pretrained(model_name, cache_dir=CACHE_DIR)
-
-
-@cache
-def cached_pipeline(model_name, task):  # TODO: maybe use device as parameter?
-    return pipeline(task, model_name, device_map="auto")
+# @cache
+# def cached_model(model_name):
+#     if is_local_path(model_name):
+#         config = AutoConfig.from_pretrained(model_name)
+#         return AutoModelForSeq2SeqLM.from_pretrained(model_name, config=config)
+#     return AutoModelForCausalLM.from_pretrained(model_name, cache_dir=CACHE_DIR)
+#
+#
+# @cache
+# def cached_tokenizer(model_name):
+#     return AutoTokenizer.from_pretrained(model_name, cache_dir=CACHE_DIR)
+#
+#
+# @cache
+# def cached_pipeline(model_name, task):  # TODO: maybe use device as parameter?
+#     return pipeline(task, model_name, device_map="auto")
 
 
 def get_together_api_key():
@@ -75,20 +75,20 @@ class LLMWrapper:
         if (NUM_BEAMS_KEY in self.generation_parameters
             and self.generation_parameters[NUM_BEAMS_KEY] < 2):
             del self.generation_parameters[NUM_BEAMS_KEY]
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        # self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.prompt_template = self._get_prompt_template()
         if self.use_together:
             self.client = Together(api_key=get_together_api_key())
             self.pipeline = self.tokenizer = self.model = None
         elif self.use_pipeline:
-            self.pipeline = cached_pipeline(self.model_name, self.pipeline_task)
+            # self.pipeline = cached_pipeline(self.model_name, self.pipeline_task)
             self.client = self.tokenizer = self.model = None
         else:
             self.pipeline = self.client = None
-            self.tokenizer = cached_tokenizer(self.model_name)
-            self.model = cached_model(self.model_name)
-            self.model.to(self.device)
-            self.model.eval()
+            # self.tokenizer = cached_tokenizer(self.model_name)
+            # self.model = cached_model(self.model_name)
+            # self.model.to(self.device)
+            # self.model.eval()
         # initial generation just to save time of first generation in real time
         self.generate(INITIAL_GENERATION_PROMPT, system_info=GENERAL_SYSTEM_INFO)
 
@@ -156,27 +156,27 @@ class LLMWrapper:
     def generate(self, input_text, system_info="", generation_parameters=None):
         if generation_parameters is None:
             generation_parameters = self.generation_parameters
-        with torch.inference_mode():
-            if self.use_together:
-                messages = self.pipeline_preprocessing(input_text, system_info)
-                self.logger.log("messages in generate with self.use_together", messages)
-                final_output = self.generate_with_together_safely(messages, generation_parameters)  # max_new_tokens -> max_tokens
-                self.logger.log("final_output in generate with self.use_together", final_output)
-            elif self.use_pipeline:
-                messages = self.pipeline_preprocessing(input_text, system_info)
-                self.logger.log("messages in generate with self.use_pipeline", messages)
-                outputs = self.pipeline(messages, **generation_parameters)
-                self.logger.log("outputs in generate with self.use_pipeline", outputs)
-                final_output = outputs[0][TASK2OUTPUT_FORMAT[self.pipeline_task]][-1]
-            else:
-                prompt = self.direct_preprocessing(input_text, system_info)
-                self.logger.log("prompt in generate directly", prompt)
-                inputs = self.tokenizer(prompt, return_tensors="pt")
-                inputs = {key: value.to(self.device) for key, value in inputs.items()}
-                outputs = self.model.generate(**inputs, **generation_parameters)
-                decoded_output = self.tokenizer.decode(outputs[0])
-                self.logger.log("decoded_output in generate directly", decoded_output)
-                final_output = self.direct_postprocessing(decoded_output)
+        # with torch.inference_mode():
+        if self.use_together:
+            messages = self.pipeline_preprocessing(input_text, system_info)
+            self.logger.log("messages in generate with self.use_together", messages)
+            final_output = self.generate_with_together_safely(messages, generation_parameters)  # max_new_tokens -> max_tokens
+            self.logger.log("final_output in generate with self.use_together", final_output)
+        elif self.use_pipeline:
+            messages = self.pipeline_preprocessing(input_text, system_info)
+            self.logger.log("messages in generate with self.use_pipeline", messages)
+            outputs = self.pipeline(messages, **generation_parameters)
+            self.logger.log("outputs in generate with self.use_pipeline", outputs)
+            final_output = outputs[0][TASK2OUTPUT_FORMAT[self.pipeline_task]][-1]
+        else:
+            prompt = self.direct_preprocessing(input_text, system_info)
+            self.logger.log("prompt in generate directly", prompt)
+            inputs = self.tokenizer(prompt, return_tensors="pt")
+            inputs = {key: value.to(self.device) for key, value in inputs.items()}
+            outputs = self.model.generate(**inputs, **generation_parameters)
+            decoded_output = self.tokenizer.decode(outputs[0])
+            self.logger.log("decoded_output in generate directly", decoded_output)
+            final_output = self.direct_postprocessing(decoded_output)
         return final_output.replace("\n", "   ").strip()
 
     def generate_with_together_safely(self, messages, generation_parameters):
