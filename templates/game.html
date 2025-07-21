@@ -75,9 +75,9 @@
         const gameId = '{{ game_id }}';
         const characterName = '{{ character_name }}';
         const isMAfia = {{ 'true' if is_mafia else 'false' }};
-
+        const webSocketURL = '{{ websocket_url }}';
         // WebSocket connection for real-time chat
-        const ws = new WebSocket(`ws://localhost:8000/ws/${gameId}?session_id=${sessionId}`);
+        const ws = new WebSocket(`${webSocketURL}/ws/${gameId}?session_id=${sessionId}`);
 
         // DOM elements
         const chatMessages = document.getElementById('chat-messages');

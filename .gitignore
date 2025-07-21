@@ -2,3 +2,7 @@
 __pycache__/
 llm_players/__pycache__/
 .secrets_dict.txt
+env/
+.env
+games/1003/
+games/1004/

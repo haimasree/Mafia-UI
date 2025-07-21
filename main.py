@@ -4,6 +4,7 @@ This replaces the need for two separate terminal windows (player_chat.py and pla
 with a single web interface accessible through a browser.
 """
 
+import os
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request, Form, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -408,6 +409,13 @@ async def game_interface(request: Request, game_id: str):
     session = player_sessions[session_id]
     if session["game_id"] != game_id:
         return RedirectResponse(url="/")
+    environment = os.getenv("FASTAPI_ENV", "")   
+    if environment == "Docker":
+        websocket_url = "ws://localhost"
+    elif environment == "Prod":
+        websocket_url = "wss://localhost"
+    else:
+        websocket_url = "ws://localhost:8000"
 
     return templates.TemplateResponse(
         "game.html",
@@ -416,7 +424,8 @@ async def game_interface(request: Request, game_id: str):
             "game_id": game_id,
             "character_name": session["character_name"],
             "real_name": session["real_name"],
-            "is_mafia": session["is_mafia"]
+            "is_mafia": session["is_mafia"],
+            "websocket_url": websocket_url
         }
     )
 
