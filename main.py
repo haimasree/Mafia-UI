@@ -413,7 +413,7 @@ async def game_interface(request: Request, game_id: str):
     if environment == "Docker":
         websocket_url = "ws://localhost"
     elif environment == "Prod":
-        websocket_url = "wss://localhost"
+        websocket_url = f"wss://{request.url.hostname}"
     else:
         websocket_url = "ws://localhost:8000"
 
