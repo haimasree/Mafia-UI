@@ -45,7 +45,7 @@ def get_id_and_config():
 
 def init_game(game_id, config_path):
     game_dir = Path(DIRS_PREFIX) / game_id
-    game_dir.mkdir(mode=0o777)
+    game_dir.mkdir()
     with open(config_path, "r") as original_file:
         config = json.load(original_file)
     config["config_original_path_when_game_created"] = config_path
@@ -76,7 +76,7 @@ def init_game(game_id, config_path):
         else:
             (game_dir / PERSONAL_SURVEY_FILE_FORMAT.format(player.name)).touch()
     # since for some reason the `mode` arg in mkdir doesn't work properly:
-    os.system(f"chmod -R 777 {game_dir}")
+    # os.system(f"chmod -R 777 {game_dir}")
     print(f"Successfully created a new game dir in: {game_dir.absolute()}")
 
 
