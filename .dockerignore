@@ -23,3 +23,5 @@ README.md
 .dockerignore
 .github
 games/
+configurations
+nginx/
