@@ -11,11 +11,17 @@ RUN pip install --no-cache-dir -r /Mafia-UI/requirements.txt
 RUN rm /Mafia-UI/requirements.txt
 
 
-RUN groupadd -g 1001 python && \
+RUN groupadd -g 1002 python && \
     useradd -r -u 997 -g python -m -d /Mafia-UI/ python
 
 
 COPY --chown=python:python . /Mafia-UI
+
+RUN mkdir -p /Mafia-UI/games && \
+    chown python:python /Mafia-UI/games
+
+RUN mkdir -p /Mafia-UI/configurations && \
+    chown python:python /Mafia-UI/configurations
 
 USER python
 
