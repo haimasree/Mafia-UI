@@ -1,0 +1,9 @@
+[14:15:12] Parker: Hi
+[14:15:21] Kai: How you guys doing
+[14:15:38] Tyler: i'm here too
+[14:16:05] Game-Manager: Daytime has ended, now it's time to vote! Waiting for all players to vote...
+[14:16:39] Game-Manager: Tyler voted for Parker
+[14:16:41] Game-Manager: Noah voted for Kai
+[14:16:44] Game-Manager: Parker voted for Kai
+[14:16:46] Game-Manager: Kai voted for Parker
+[14:16:48] Game-Manager: Avery voted for Kai

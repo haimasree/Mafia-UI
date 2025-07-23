@@ -1,0 +1,2 @@
+[14:15:05] Game-Manager: Now it's Daytime for 1.0 minutes, everyone can communicate and see messages and votes.
+[14:16:48] Game-Manager: Kai was voted out. Their role was mafia
